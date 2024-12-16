@@ -1,5 +1,6 @@
-//Build Artifacts
+# Build Artifacts
 *.out
 
-//System Files
+# System Files
 .DS_Store
+*.dSYM/
