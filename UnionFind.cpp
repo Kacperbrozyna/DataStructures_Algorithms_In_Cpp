@@ -49,7 +49,53 @@ void QuickFindAlgorithm()
     }
 };
 
+/* 
+For the price of improving the union operation the find operation will take longer
+compared to the algorithm above, the objects here might need to take several links to get to the root unlike the other algoritm
+The worst case scenario is if the union operation links a set of pairs where n-1 points to n-2 and so forth which forms a straight line
+meaning the find opertion could check each link (n-1).
+*/ 
+void QuickUnionAlgorithm()
+{
+    int p,q;
+    std::array<int, static_cast<size_t>( MAX )> ids;
+    std::iota( ids.begin(), ids.end(), 0);
+
+    while( std::cin >> p >> q )
+    {
+        //Pair is already connected
+        if( ids[p] == ids[q] )
+        {
+            std::cout << "Pair already connected \n" << std::endl;
+            continue;
+        }
+
+        /*
+        Go through object p and assign it to the root ( object points at itself )
+
+        Given array      { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }
+        Connect 3,4
+        Array will be    { 0, 1, 2, 4, 4, 5, 6, 7, 8, 9 }
+        Connect 4,9
+        Array will be    { 0, 1, 2, 4, 9, 5 ,6, 7, 8, 9 }
+        Connect 4,9
+        Array will be    { 0, 1, 9, 4, 9, 5 ,6, 7, 8, 9 }
+        */
+        int t = q;
+
+        while( t != ids[t] )
+        {
+            t = ids[t];
+        }
+
+        ids[p] = t;
+
+        std::cout << "P is now pointing to root: " << ids[p] << std::endl;
+    }
+}
+
 int main()
 {
-   QuickFindAlgorithm();
+   //QuickFindAlgorithm();
+   QuickUnionAlgorithm();
 }
