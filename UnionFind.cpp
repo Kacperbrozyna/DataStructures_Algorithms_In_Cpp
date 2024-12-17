@@ -62,7 +62,15 @@ void QuickUnionAlgorithm()
 
     while( std::cin >> p >> q )
     {
-        if( ids[p] == ids[q] )
+        //Find the roots of P and Q
+        int root_q = ids[q];
+        while( root_q != ids[root_q] )
+            root_q = ids[root_q];
+
+        while( p != ids[p] )
+            p = ids[p];
+
+        if( ids[p] == ids[root_q] )
         {
             std::cout << "Pair already connected \n" << std::endl;
             continue;
@@ -76,15 +84,11 @@ void QuickUnionAlgorithm()
         Array will be    { 0, 1, 2, 4, 4, 5, 6, 7, 8, 9 }
         Connect 4,9
         Array will be    { 0, 1, 2, 4, 9, 5 ,6, 7, 8, 9 }
-        Connect 4,9
+        Connect 2,3
         Array will be    { 0, 1, 9, 4, 9, 5 ,6, 7, 8, 9 }
         */
 
-        //find the root of Q
-        while( q != ids[q] )
-            q = ids[q];
-
-        ids[p] = q;
+        ids[p] = root_q;
 
         std::cout << "P is now pointing to root: " << ids[p] << std::endl;
     }
