@@ -101,7 +101,7 @@ depending on this connect the object with less children to the object with more.
 */
 void WeightedQuickUnionAlgorithm()
 {
-    int p, q, id[MAX], sz[MAX];
+    int p, q;
 
     std::array<int, static_cast<size_t>( MAX )> ids;
     std::array<int, static_cast<size_t>( MAX )> children_objects;
@@ -112,7 +112,7 @@ void WeightedQuickUnionAlgorithm()
     while( std::cin >> p >> q )
     {
 
-        //Find the roots of P and Q
+        //Find the absolute roots of P and Q
         while( q != ids[q] )
             q = ids[q];
 
@@ -141,9 +141,114 @@ void WeightedQuickUnionAlgorithm()
     }
 }
 
+/*
+By adding halving during find operations means we can flatten the tree dynamically then with the weighting
+during the union means that the depth of the tree will growly slowly.
+*/
+void WeightedQuickUnionWithHalvingAlgorithm()
+{
+    int p, q;
+
+    std::array<int, static_cast<size_t>( MAX )> ids;
+    std::array<int, static_cast<size_t>( MAX )> children_objects;
+
+    std::iota( ids.begin(), ids.end(), 0 );
+    std::fill( children_objects.begin(), children_objects.end(), 1 );
+
+    while( std::cin >> p >> q )
+    {
+        //Find the roots of Q and P
+        //We are doing the halving part during the find operation
+        while( q != ids[q] )
+        {
+            ids[q] = ids[ids[q]];
+            q = ids[q];
+        }
+        
+        while( p != ids[p] )
+        {
+            ids[p] = ids[ids[p]];
+            p = ids[p];
+        }
+
+        if( ids[p] == ids[q] )
+        {
+            std::cout << "Pair already connected \n" << std::endl;
+            continue;
+        }
+
+        //Connect the root with the lesser amount of children to the one with more
+        if( children_objects[p] < children_objects[q] )
+        {
+            children_objects[q] += children_objects[p];
+            ids[p] = q;
+            std::cout << "Root of P is now pointing to root of Q: " << ids[p] << " which now has " << children_objects[q] << " children" << std::endl;
+        }
+        else
+        {
+            children_objects[p] += children_objects[q];
+            ids[q] = ids[p];
+            std::cout << "Root of Q is now pointing to root of P: " << ids[q] << " which now has " << children_objects[p] << " children" << std::endl;
+        }
+    }
+}
+
+
+/*
+This aggressively flattens the tree, might not be wise to use on a deep tree due to recursive calls
+possibly causing a stack overflow. 
+*/
+void WeightedQuickUnionWithFullCompressionAlgorithm()
+{
+    int p, q;
+
+    std::array<int, static_cast<size_t>( MAX )> ids;
+    std::array<int, static_cast<size_t>( MAX )> children_objects;
+
+    std::iota( ids.begin(), ids.end(), 0 );
+    std::fill( children_objects.begin(), children_objects.end(), 1 );
+
+    auto find = [&ids]( int x, auto& find_fn ) -> int {
+        if( x != ids[x] )
+            ids[x] = find_fn( ids[x], find_fn );
+        return ids[x];
+    };
+
+    while( std::cin >> p >> q )
+    {
+        //Find the roots of Q and P
+        //Do full compression of tree using recursive find
+        q = find( q, find );
+        p = find( p, find );
+
+        if( ids[p] == ids[q] )
+        {
+            std::cout << "Pair already connected \n" << std::endl;
+            continue;
+        }
+
+        //Connect the root with the lesser amount of children to the one with more
+        if( children_objects[p] < children_objects[q] )
+        {
+            children_objects[q] += children_objects[p];
+            ids[p] = q;
+            std::cout << "Root of P is now pointing to root of Q: " << ids[p] << " which now has " << children_objects[q] << " children" << std::endl;
+        }
+        else
+        {
+            children_objects[p] += children_objects[q];
+            ids[q] = ids[p];
+            std::cout << "Root of Q is now pointing to root of P: " << ids[q] << " which now has " << children_objects[p] << " children" << std::endl;
+        }
+    }
+}
+
+
 int main()
 {
-   //QuickFindAlgorithm();
-   //QuickUnionAlgorithm();
-   WeightedQuickUnionAlgorithm();
+    //QuickFindAlgorithm();
+    //QuickUnionAlgorithm();
+    //WeightedQuickUnionAlgorithm();
+    //WeightedQuickUnionWithHalvingAlgorithm();
+    WeightedQuickUnionWithFullCompressionAlgorithm();
 }
