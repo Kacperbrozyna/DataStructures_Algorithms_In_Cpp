@@ -16,13 +16,12 @@ void QuickFindAlgorithm()
 {
     int p,q;
     std::array<int, static_cast<size_t>( MAX )> ids;
-    std::iota( ids.begin(), ids.end(), 0);
+    std::iota( ids.begin(), ids.end(), 0 );
 
     while( std::cin >> p >> q )
     {
         int t = ids[p];
 
-        //Pair is already connected
         if( t == ids[q] )
         {
             std::cout << "Pair already connected \n" << std::endl;
@@ -59,11 +58,10 @@ void QuickUnionAlgorithm()
 {
     int p,q;
     std::array<int, static_cast<size_t>( MAX )> ids;
-    std::iota( ids.begin(), ids.end(), 0);
+    std::iota( ids.begin(), ids.end(), 0 );
 
     while( std::cin >> p >> q )
     {
-        //Pair is already connected
         if( ids[p] == ids[q] )
         {
             std::cout << "Pair already connected \n" << std::endl;
@@ -71,7 +69,7 @@ void QuickUnionAlgorithm()
         }
 
         /*
-        Go through object p and assign it to the root ( object points at itself )
+        Point object p to the root of object q ( when the object points at itself = root )
 
         Given array      { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }
         Connect 3,4
@@ -81,21 +79,67 @@ void QuickUnionAlgorithm()
         Connect 4,9
         Array will be    { 0, 1, 9, 4, 9, 5 ,6, 7, 8, 9 }
         */
-        int t = q;
 
-        while( t != ids[t] )
-        {
-            t = ids[t];
-        }
+        //find the root of Q
+        while( q != ids[q] )
+            q = ids[q];
 
-        ids[p] = t;
+        ids[p] = q;
 
         std::cout << "P is now pointing to root: " << ids[p] << std::endl;
+    }
+}
+
+/*
+To counteract the worst case scenario we add an extra array that holds the amount of children that the root has.
+When we come to connecting objects together we compare the number of children that root of P and root of Q has,
+depending on this connect the object with less children to the object with more.
+*/
+void WeightedQuickUnionAlgorithm()
+{
+    int p, q, id[MAX], sz[MAX];
+
+    std::array<int, static_cast<size_t>( MAX )> ids;
+    std::array<int, static_cast<size_t>( MAX )> children_objects;
+
+    std::iota( ids.begin(), ids.end(), 0 );
+    std::fill( children_objects.begin(), children_objects.end(), 1 );
+
+    while( std::cin >> p >> q )
+    {
+
+        //Find the roots of P and Q
+        while( q != ids[q] )
+            q = ids[q];
+
+        while( p != ids[p] )
+            p = ids[p];
+
+        if( ids[p] == ids[q] )
+        {
+            std::cout << "Pair already connected \n" << std::endl;
+            continue;
+        }
+
+        //Connect the root with the lesser amount of children to the one with more
+        if( children_objects[p] < children_objects[q] )
+        {
+            children_objects[q] += children_objects[p];
+            ids[p] = q;
+            std::cout << "Root of P is now pointing to root of Q: " << ids[p] << " which now has " << children_objects[q] << " children" << std::endl;
+        }
+        else
+        {
+            children_objects[p] += children_objects[q];
+            ids[q] = ids[p];
+            std::cout << "Root of Q is now pointing to root of P: " << ids[q] << " which now has " << children_objects[p] << " children" << std::endl;
+        }
     }
 }
 
 int main()
 {
    //QuickFindAlgorithm();
-   QuickUnionAlgorithm();
+   //QuickUnionAlgorithm();
+   WeightedQuickUnionAlgorithm();
 }
