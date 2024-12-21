@@ -5,9 +5,12 @@
 My implementation of a linearly linked list
 Using shared_ptr instead of raw pointers
 
+To make this list circular linked, the last node (tail) should point to head_
+
 TODO:
 Test it works.. (It does build)
 Change to template
+Reverse the linked list
 */
 
 struct Node
@@ -160,6 +163,9 @@ public:
             temp = temp->next_node_;
         }
     };
+
+    void Reverse()
+    {};
 
     size_t Size()
     {
