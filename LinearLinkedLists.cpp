@@ -1,6 +1,15 @@
 #include <memory>
 #include <iostream>
 
+/*
+My implementation of a linearly linked list
+Using shared_ptr instead of raw pointers
+
+TODO:
+Test it works.. (It does build)
+Change to template
+*/
+
 struct Node
 {
     int data_;
