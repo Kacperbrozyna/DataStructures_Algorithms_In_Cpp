@@ -11,12 +11,13 @@ TODO:
 Change to template
 */
 
+template<typename T>
 struct Node
 {
-    int data_;
+    T data_;
     std::shared_ptr<Node> next_node_;
 
-    Node( int data, std::shared_ptr<Node> next_node )
+    Node( const T& data, std::shared_ptr<Node<T>> next_node )
     : data_( data )
     , next_node_( next_node ) 
     {}
@@ -27,19 +28,20 @@ struct Node
     }
 };
 
+template<class T>
 class LinkedList
 {
 public:
-    void InsertAtBeginning( int data )
+    void InsertAtBeginning( const T& data )
     {
-        std::shared_ptr<Node> new_node{ std::make_shared<Node>( data, head_ ) };
+        std::shared_ptr<Node<T>> new_node{ std::make_shared<Node<T>>( data, head_ ) };
         head_ = new_node;
         ++size_;
     };
 
-    void InsertAtEnd( int data )
+    void InsertAtEnd( const T& data )
     {
-        std::shared_ptr<Node> new_node{ std::make_shared<Node>( data, nullptr ) };
+        std::shared_ptr<Node<T>> new_node{ std::make_shared<Node<T>>( data, nullptr ) };
         ++size_;
 
         if( !head_ )
@@ -48,7 +50,7 @@ public:
             return;
         }
 
-        std::shared_ptr<Node> tail{ head_ };
+        std::shared_ptr<Node<T>> tail{ head_ };
 
         while( tail->next_node_ )
             tail = tail->next_node_;
@@ -56,7 +58,7 @@ public:
         tail->next_node_ = new_node;
     };
 
-    void InsertAtPosition( int data, size_t position )
+    void InsertAtPosition( const T& data, size_t position )
     {
         if( !head_ || position == 0 )
         {
@@ -70,7 +72,7 @@ public:
             return;
         }
 
-        std::shared_ptr<Node> temp{ head_ };
+        std::shared_ptr<Node<T>> temp{ head_ };
         for( size_t i = 1; i < position; ++i )
         { 
             if( !temp )
@@ -82,7 +84,7 @@ public:
             temp = temp->next_node_;
         }
 
-        std::shared_ptr<Node> new_node{ std::make_shared<Node>( data, temp->next_node_ ) };
+        std::shared_ptr<Node<T>> new_node{ std::make_shared<Node<T>>( data, temp->next_node_ ) };
         temp->next_node_ = new_node;
         ++size_;
     };
@@ -114,7 +116,7 @@ public:
             return;
         }
 
-        std::shared_ptr<Node> temp{ head_ };
+        std::shared_ptr<Node<T>> temp{ head_ };
         while( temp->next_node_->next_node_ )
             temp = temp->next_node_;
 
@@ -142,7 +144,7 @@ public:
             return;
         }
 
-        std::shared_ptr<Node> temp{ head_ };
+        std::shared_ptr<Node<T>> temp{ head_ };
         for( size_t i = 1; i < position; ++i )
         {
             temp = temp->next_node_;
@@ -166,7 +168,7 @@ public:
             return;
         }
 
-        std::shared_ptr<Node> temp{ head_ };
+        std::shared_ptr<Node<T>> temp{ head_ };
 
         while( temp )
         {
@@ -180,7 +182,7 @@ public:
         if( !size_ )
             return;
 
-        std::shared_ptr<Node> prev_node, curr_node, next_node;
+        std::shared_ptr<Node<T>> prev_node, curr_node, next_node;
         curr_node = head_;
 
         while( curr_node )
@@ -207,13 +209,13 @@ public:
     }
 
 private:
-    std::shared_ptr<Node> head_;
+    std::shared_ptr<Node<T>> head_;
     size_t size_{ 0 };
 };
 
 int main()
 {
-    LinkedList list;
+    LinkedList<int> list;
 
     //Almost like unit tests would be a better alternative...
     for( int i = 0; i < 5; ++i )
@@ -235,5 +237,4 @@ int main()
 
     list.Clear();
     list.PrintAllNodes();
-    
 }
