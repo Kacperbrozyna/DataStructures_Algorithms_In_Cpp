@@ -8,9 +8,7 @@ Using shared_ptr instead of raw pointers
 To make this list circular linked, the last node (tail) should point to head_
 
 TODO:
-Test it works.. (It does build)
 Change to template
-Reverse the linked list
 */
 
 struct Node
@@ -22,6 +20,11 @@ struct Node
     : data_( data )
     , next_node_( next_node ) 
     {}
+
+    ~Node()
+    {
+        std::cout << "Node Removed" << std::endl;
+    }
 };
 
 class LinkedList
@@ -55,21 +58,29 @@ public:
 
     void InsertAtPosition( int data, size_t position )
     {
-        if( !head_ || position == 1 )
+        if( !head_ || position == 0 )
         {
             InsertAtBeginning( data );
             return;
         }
 
-        if( position >= size_ )
+        if( position > size_ )
         {
             std::cout << "Position is out of range" << std::endl;
             return;
         }
 
-        std::shared_ptr<Node> temp{ head_->next_node_ };
-        for( size_t i = 2; i < position - static_cast<size_t>( 1 ) && temp; ++i )
+        std::shared_ptr<Node> temp{ head_ };
+        for( size_t i = 1; i < position; ++i )
+        { 
+            if( !temp )
+            {
+                std::cout << "Position out of range" << std::endl;
+                return;
+            }
+            
             temp = temp->next_node_;
+        }
 
         std::shared_ptr<Node> new_node{ std::make_shared<Node>( data, temp->next_node_ ) };
         temp->next_node_ = new_node;
@@ -119,20 +130,20 @@ public:
             return;
         }
 
-        if( position == 1 )
+        if( position == 0 )
         {
             DeletAtBeginning();
             return;
         }
 
-        if( position >= size_ )
+        if( position > size_ )
         {
             std::cout << "Position is out of range" << std::endl;
             return;
         }
 
         std::shared_ptr<Node> temp{ head_ };
-        for( size_t i = 1; i < position - static_cast<size_t>( 1 ); ++i )
+        for( size_t i = 1; i < position; ++i )
         {
             temp = temp->next_node_;
 
@@ -165,7 +176,30 @@ public:
     };
 
     void Reverse()
-    {};
+    {
+        if( !size_ )
+            return;
+
+        std::shared_ptr<Node> prev_node, curr_node, next_node;
+        curr_node = head_;
+
+        while( curr_node )
+        {
+            next_node = curr_node->next_node_;
+            curr_node->next_node_ = prev_node;
+            prev_node = curr_node;
+            curr_node = next_node;
+        }
+
+        head_ = prev_node;
+    };
+
+    void Clear()
+    {
+        //should cause a cascade of deletes due to smart pointers;
+        head_ = nullptr;
+        size_ = 0;
+    }
 
     size_t Size()
     {
@@ -180,4 +214,26 @@ private:
 int main()
 {
     LinkedList list;
+
+    //Almost like unit tests would be a better alternative...
+    for( int i = 0; i < 5; ++i )
+        list.InsertAtBeginning( i );
+
+
+    list.PrintAllNodes();
+
+    list.DeleteAtEnd();
+    list.PrintAllNodes();
+
+    list.InsertAtPosition( 10 , 2 );
+
+    list.DeleteAtPosition(4);
+    list.PrintAllNodes();
+
+    list.Reverse();
+    list.PrintAllNodes();
+
+    list.Clear();
+    list.PrintAllNodes();
+    
 }
