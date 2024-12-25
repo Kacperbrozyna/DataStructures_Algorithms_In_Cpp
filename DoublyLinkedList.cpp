@@ -2,21 +2,24 @@
 #include <iostream>
 
 /*
-My implementation of a linearly linked list
-Using shared_ptr instead of raw pointers
+My implementation of a doubly linked list
+Using raw pointers for this implementation
 
-To make this list circular linked, the last node (tail) should point to head_
+could also store a tail_ in addition to head_ to make "iteration" over the container easier
+hence see PrintAllNodes( true ); 
 */
 
 template<typename T>
 struct Node
 {
     T data_;
-    std::shared_ptr<Node> next_node_;
+    Node<T>* next_node_;
+    Node<T>* prev_node_;
 
-    Node( const T& data, std::shared_ptr<Node<T>> next_node )
+    Node( const T& data, Node<T>* next_node, Node<T>* prev_node )
     : data_( data )
     , next_node_( next_node ) 
+    , prev_node_( prev_node ) 
     {}
 
     ~Node()
@@ -28,31 +31,41 @@ struct Node
 template<class T>
 class LinkedList
 {
+
 public:
+
+    LinkedList() = default;
+    ~LinkedList(){ Clear(); };
+
     void InsertAtBeginning( const T& data )
     {
-        std::shared_ptr<Node<T>> new_node{ std::make_shared<Node<T>>( data, head_ ) };
+        Node<T>* new_node{ new Node<T>( data, nullptr, nullptr ) };
+        if( head_ )
+        {
+            new_node->next_node_ = head_;
+            head_->prev_node_ = new_node;
+        }
+
         head_ = new_node;
         ++size_;
     };
 
     void InsertAtEnd( const T& data )
     {
-        std::shared_ptr<Node<T>> new_node{ std::make_shared<Node<T>>( data, nullptr ) };
-        ++size_;
-
         if( !head_ )
         {
-            head_ = new_node;
+            InsertAtBeginning( data );
             return;
         }
 
-        std::shared_ptr<Node<T>> tail{ head_ };
+        Node<T>* tail{ head_ };
 
         while( tail->next_node_ )
             tail = tail->next_node_;
         
-        tail->next_node_ = new_node;
+        tail->next_node_ = new Node<T>( data, nullptr, tail );
+        ++size_;
+        
     };
 
     void InsertAtPosition( const T& data, size_t position )
@@ -69,7 +82,7 @@ public:
             return;
         }
 
-        std::shared_ptr<Node<T>> temp{ head_ };
+        Node<T>* temp{ head_ };
         for( size_t i = 1; i < position; ++i )
         { 
             if( !temp )
@@ -81,7 +94,10 @@ public:
             temp = temp->next_node_;
         }
 
-        std::shared_ptr<Node<T>> new_node{ std::make_shared<Node<T>>( data, temp->next_node_ ) };
+        Node<T>* new_node{ new Node<T>( data, temp->next_node_, temp ) };
+        if( temp->next_node_ )
+            temp->next_node_->prev_node_ = new_node;
+
         temp->next_node_ = new_node;
         ++size_;
     };
@@ -93,8 +109,13 @@ public:
             std::cout << "List is empty" << std::endl;
             return;
         }
-
+        
+        Node<T>* temp{ head_ };
         head_ = head_->next_node_;
+        head_->prev_node_ = nullptr;
+
+        delete temp;
+
         --size_;
     };
 
@@ -108,15 +129,19 @@ public:
 
         if( !head_->next_node_ )
         {
+            delete head_;
             head_ = nullptr;
+
             --size_;
+
             return;
         }
 
-        std::shared_ptr<Node<T>> temp{ head_ };
+        Node<T>* temp{ head_ };
         while( temp->next_node_->next_node_ )
             temp = temp->next_node_;
 
+        delete temp->next_node_;
         temp->next_node_ = nullptr;
         --size_;
     };
@@ -131,7 +156,7 @@ public:
 
         if( position == 0 )
         {
-            DeletAtBeginning();
+            DeleteAtBeginning();
             return;
         }
 
@@ -141,7 +166,7 @@ public:
             return;
         }
 
-        std::shared_ptr<Node<T>> temp{ head_ };
+        Node<T>* temp{ head_ };
         for( size_t i = 1; i < position; ++i )
         {
             temp = temp->next_node_;
@@ -153,11 +178,18 @@ public:
             }
         }
 
+        Node<T>* delete_node{ temp->next_node_ };
         temp->next_node_ = temp->next_node_->next_node_;
+
+        delete delete_node;
+
+        if( temp->next_node_ )
+            temp->next_node_->prev_node_ = temp;
+
         --size_;
     };
 
-    void PrintAllNodes() 
+    void PrintAllNodes( bool reverse ) const
     {
         if( !head_ )
         {
@@ -165,12 +197,27 @@ public:
             return;
         }
 
-        std::shared_ptr<Node<T>> temp{ head_ };
+        const Node<T>* temp{ head_ };
 
-        while( temp )
+        if( !reverse )
         {
-            std::cout << "Data: " << temp->data_ << std::endl;
-            temp = temp->next_node_;
+            while( temp )
+            {
+                std::cout << "Data: " << temp->data_ << std::endl;
+                temp = temp->next_node_;
+            }
+        }
+        else
+        {
+            while( temp->next_node_ )
+                temp = temp->next_node_;
+
+            const Node<T>* prev_node{ temp };
+            while( prev_node )
+            {
+                std::cout << "Data: " << prev_node->data_ << std::endl;
+                prev_node = prev_node->prev_node_;
+            }
         }
     };
 
@@ -179,24 +226,35 @@ public:
         if( !size_ )
             return;
 
-        std::shared_ptr<Node<T>> prev_node, curr_node, next_node;
-        curr_node = head_;
+        Node<T>* curr_node{ head_ };
+        Node<T>* temp_node{ nullptr };
 
         while( curr_node )
         {
-            next_node = curr_node->next_node_;
-            curr_node->next_node_ = prev_node;
-            prev_node = curr_node;
-            curr_node = next_node;
-        }
+            temp_node = curr_node->next_node_;
+            curr_node->next_node_ = curr_node->prev_node_;
+            curr_node->prev_node_ = temp_node;
+        
+            if( !temp_node )
+            {
+                head_ = curr_node;
+                break;
+            }
 
-        head_ = prev_node;
+            curr_node = temp_node;
+        }
     };
 
     void Clear()
     {
         while( head_ )
-            head_ = head->next_node_;
+        {
+            Node<T>* temp = head_->next_node_;
+
+            delete head_;
+
+            head_ = temp;
+        }
             
         size_ = 0;
     }
@@ -207,7 +265,7 @@ public:
     }
 
 private:
-    std::shared_ptr<Node<T>> head_;
+    Node<T>* head_{ nullptr };
     size_t size_{ 0 };
 };
 
@@ -219,20 +277,19 @@ int main()
     for( int i = 0; i < 5; ++i )
         list.InsertAtBeginning( i );
 
-
-    list.PrintAllNodes();
+    list.PrintAllNodes(true);
 
     list.DeleteAtEnd();
-    list.PrintAllNodes();
+    list.PrintAllNodes(false);
 
     list.InsertAtPosition( 10 , 2 );
 
     list.DeleteAtPosition(4);
-    list.PrintAllNodes();
+    list.PrintAllNodes(false);
 
     list.Reverse();
-    list.PrintAllNodes();
+    list.PrintAllNodes(false);
 
     list.Clear();
-    list.PrintAllNodes();
+    list.PrintAllNodes(false);
 }
