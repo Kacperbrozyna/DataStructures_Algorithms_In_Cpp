@@ -5,7 +5,14 @@
 My implementation of a linearly linked list
 Using shared_ptr instead of raw pointers
 
-To make this list circular linked, the last node (tail) should point to head_
+To make this list circular linked, the (tail) last_node->next_node_ should point to head_
+
+more stuff that I 
+CAN-DO:
+Move & Copy Ctor
+sorting (insertion sort?)
+exchange 2 nodes in a given list
+(goes for doubly linked list as well)
 */
 
 template<typename T>
