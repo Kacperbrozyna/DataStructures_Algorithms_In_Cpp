@@ -27,7 +27,7 @@ class ArrayStack
 public:
     void Push( const T& data )
     {
-        if( index_ >= capacity_ )
+        if( index_ >= static_cast<int>( capacity_ ) )
         {
             std::cout << "Stack out of space" << std::endl;
             return;
