@@ -14,7 +14,7 @@ The array queue uses two indexes instead of 1 like in the stack
 
 constexpr size_t ARRAY_QUEUE_SIZE_ = 100;
 
-enum class StackOpertaions
+enum class QueueOpertaions
 {
     WRITE_ = 0,
     READ_,
@@ -120,11 +120,11 @@ int main()
     ArrayQueue<size_t, ARRAY_QUEUE_SIZE_> array_queue;
     LinkedlistQueue<size_t> linked_list_queue;
 
-    for( size_t i = 0; i < static_cast<size_t>( StackOpertaions::COUNT_ ); ++i )
+    for( size_t i = 0; i < static_cast<size_t>( QueueOpertaions::COUNT_ ); ++i )
     {
         for( size_t j = 0; j < ARRAY_QUEUE_SIZE_ ; ++j )
         {
-            if( i == static_cast<size_t>( StackOpertaions::WRITE_ ) )
+            if( i == static_cast<size_t>( QueueOpertaions::WRITE_ ) )
             {
                 array_queue.Push( j );
                 linked_list_queue.Push( j );
