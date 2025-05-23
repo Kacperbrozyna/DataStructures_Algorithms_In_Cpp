@@ -47,6 +47,7 @@ public:
         if( Empty() )
         {
             std::cout << "Cannot pop further" << std::endl;
+            return;
         }
 
         ++front_index_;

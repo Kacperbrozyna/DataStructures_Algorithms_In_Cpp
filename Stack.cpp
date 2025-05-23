@@ -27,7 +27,7 @@ class ArrayStack
 public:
     void Push( const T& data )
     {
-        if( index_ >= static_cast<int>( capacity_ ) )
+        if( index_ >= static_cast<int>( capacity_ ) - 1 )
         {
             std::cout << "Stack out of space" << std::endl;
             return;
@@ -41,6 +41,7 @@ public:
         if( index_ < 0 )
         {
             std::cout << "Cannot pop further" << std::endl;
+            return;
         }
 
         --index_;
