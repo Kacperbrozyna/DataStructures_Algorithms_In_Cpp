@@ -11,7 +11,7 @@ struct Node
         , right_( right ) 
         {}
 
-    T data_{ 0 };
+    T data_;
     bool end_of_word_{false};
     Node<T>* left_;
     Node<T>* middle_;
