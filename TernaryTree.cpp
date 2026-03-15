@@ -1,20 +1,21 @@
 #include <iostream>
 #include <queue>
 
+template<typename T>
 struct Node
 {
-    Node( char data, Node* left = nullptr, Node* middle = nullptr, Node* right = nullptr )
+    Node( T data, Node<T>* left = nullptr, Node<T>* middle = nullptr, Node<T>* right = nullptr )
         : data_( data )
         , left_( left )
         , middle_( middle )
         , right_( right ) 
         {}
 
-    char data_{ '\0' };
+    T data_{ 0 };
     bool end_of_word_{false};
-    Node* left_;
-    Node* middle_;
-    Node* right_;
+    Node<T>* left_;
+    Node<T>* middle_;
+    Node<T>* right_;
 };
 
 enum class DFSTraversal
@@ -24,7 +25,8 @@ enum class DFSTraversal
     POST_ORDER_,            // Left, Right, Node
 };
 
-void DepthFirstSearchTraversal( Node* node, DFSTraversal dfs_traversal_option )
+template<typename T>
+void DepthFirstSearchTraversal( Node<T>* node, DFSTraversal dfs_traversal_option )
 {
     if( node == nullptr )
         return;
@@ -41,7 +43,6 @@ void DepthFirstSearchTraversal( Node* node, DFSTraversal dfs_traversal_option )
             DepthFirstSearchTraversal( node->left_, dfs_traversal_option );
             std::cout << node->data_ << std::endl;
             DepthFirstSearchTraversal( node->middle_, dfs_traversal_option );
-            std::cout << node->data_ << std::endl;
             DepthFirstSearchTraversal( node->right_, dfs_traversal_option );
             break;
         case DFSTraversal::POST_ORDER_:
@@ -55,17 +56,18 @@ void DepthFirstSearchTraversal( Node* node, DFSTraversal dfs_traversal_option )
     }
 }
 
-void BreadthFirstSearch( Node* root )
+template<typename T>
+void BreadthFirstSearch( Node<T>* root )
 {
     if( root == nullptr )
         return;
 
-    std::queue<Node*> node_queue;
+    std::queue<Node<T>*> node_queue;
     node_queue.push( root );
     
     while( node_queue.size() )
     {
-        Node* temp_node = node_queue.front();
+        Node<T>* temp_node = node_queue.front();
         std::cout << temp_node->data_ << std::endl;
 
         if( temp_node->left_)
@@ -81,89 +83,102 @@ void BreadthFirstSearch( Node* root )
     }
 }
 
-Node* Insert( Node* node, char data )
-{
-    if( !node )
-        return new Node{ data };
+template<typename T>
+Node<T>* Insert(Node<T>* node, T data) {
+    if (!node)
+        return new Node(data);
 
-    if( node->data_ == data )
-        return node;
-
-    if( node->data_ < data )
+    if (data < node->data_) 
     {
-        node->right_ = Insert( node->right_, data );
-        return node;
+        node->left_ = Insert(node->left_, data);
+    } 
+    else if (data > node->data_) 
+    {
+        node->right_ = Insert(node->right_, data);
+    } 
+    else 
+    {
+        node->middle_ = Insert(node->middle_, data);
     }
 
-    node->left_ = Insert( node->left_, data );
     return node;
 }
 
-Node* Find( Node* node, char data )
-{
+template<typename T>
+Node<T>* Find(Node<T>* node, int data) {
     if( !node )
+    { 
         return nullptr;
+    }
 
-    if( node->data_ == data )
-        return node;
+    if( data < node->data_ ) 
+    { 
+        return Find(node->left_, data);
+    }
 
-    if( node->data_ < data )
-        return Find( node->right_, data );
-    
-    return Find( node->left_, data );
+    if( data > node->data_ ) 
+    {
+        return Find(node->right_, data);
+    }
+
+    return node; 
 }
 
-Node* InorderSuccessor( Node* node )
+template<typename T>
+Node<T>* InorderSuccessor( Node<T>* node )
 {
-    Node* current{ node };
+    Node<T>* current{ node };
     while( current && current->left_ != nullptr )
         current = current->left_;
 
     return current;
 }
 
-Node* Remove( Node* node, char data )
+template<typename T>
+Node<T>* Remove( Node<T>* node, char data )
 {
     if( !node )
+    {
         return nullptr;
-    
-    if( node->data_ < data )
-    {
-        node->right_ = Remove( node->right_, data );
-        return node;
     }
 
-    if( node->data_ > data )
+    if( data < node->data_ ) 
     {
-        node->left_ = Remove( node->left_, data );
-        return node;
-    }
-
-    if( node->left_ == nullptr )
+        node->left_ = Remove(node->left_, data);
+    } 
+    else if( data > node->data_ ) 
     {
-        Node* temp = node->right_;
-        delete node;
-        return temp;
-    }
-    
-    if( node->right_ == nullptr )
+        node->right_ = Remove(node->right_, data);
+    } 
+    else 
     {
-        Node* temp = node->left_;
-        delete node;
-        return temp;
+        if (node->middle_) {
+            Node<T>* temp = node->middle_;
+            delete node;
+            return temp; 
+        }
+
+        if (!node->left_) {
+            Node<T>* temp = node->right_;
+            delete node;
+            return temp;
+        }
+        if (!node->right_) {
+            Node<T>* temp = node->left_;
+            delete node;
+            return temp;
+        }
+
+        Node<T>* temp = InorderSuccessor(node->right_);
+        node->data_ = temp->data_;
+        node->right_ = Remove(node->right_, temp->data_);
     }
-
-    Node* temp = InorderSuccessor( node );
-    if( !temp )
-        return nullptr;
-
-    node->data_ = temp->data_;
-    node->right_ = Remove( node->right_, node->data_ );
 
     return node;
 }
 
-size_t Size( Node* node )
+template<typename T>
+size_t Size( Node<T>* node )
 {
     if( !node )
         return 0;
@@ -171,7 +186,8 @@ size_t Size( Node* node )
     return static_cast<size_t>( 1 ) + Size( node->left_ ) + Size( node->right_ ) + Size( node->middle_ );
 }
 
-int DepthOfNode( Node* node, char data, int depth )
+template<typename T>
+int DepthOfNode( Node<T>* node, T data, int depth )
 {
     if( !node )
         return -1;
@@ -185,7 +201,8 @@ int DepthOfNode( Node* node, char data, int depth )
     return DepthOfNode( node->left_, data, ++depth );
 }
 
-int HeightOfNode( Node* node )    //Can find the Height of the Tree by using the root node
+template<typename T>
+int HeightOfNode( Node<T>* node )    //Can find the Height of the Tree by using the root node
 {
     if( !node )
         return -1;
@@ -195,20 +212,11 @@ int HeightOfNode( Node* node )    //Can find the Height of the Tree by using the
 
 int main()
 {
-    // Construct a hardcoded binary tree:
-    //
-    //          1
-    //         / \
-    //        2   3
-    //       /   / \
-    //      4   5   6
-
-    Node* root = new Node( 4 );
-    Insert( root, 5 );
-    Insert( root, 6 );
-    Insert( root, 2 );
-    Insert( root, 3 );
-    Insert( root, 1 );
+    Node<int>* root = new Node( 4 );
+    root = Insert(root, 20);
+    root = Insert(root, 10);
+    root = Insert(root, 20); // This goes to the middle of the first 20
+    root = Insert(root, 30);
 
     std::cout << "PreOrder: " << std::endl;
     DepthFirstSearchTraversal( root, DFSTraversal::PRE_ORDER_ );
@@ -222,18 +230,18 @@ int main()
     std::cout << "Breadth First Search: " << std::endl;
     BreadthFirstSearch( root );
 
-    std::cout << "KB: finding 3, is found: " << ( Find( root, 3 ) != nullptr ) << std::endl;
-    std::cout << "KB: finding 6, is found: " << ( Find( root, 3 ) != nullptr ) << std::endl;
-    std::cout << "KB: finding -1, is found: " << ( Find( root, -1 ) != nullptr ) << std::endl;
+    std::cout << "Finding 10, is found: " << ( Find( root, 10 ) != nullptr ) << std::endl;
+    std::cout << "Finding 30, is found: " << ( Find( root, 30 ) != nullptr ) << std::endl;
+    std::cout << "Finding -1, is found: " << ( Find( root, -1 ) != nullptr ) << std::endl;
 
-    std::cout << "KB: size of BST: " << Size( root ) << std::endl;
+    std::cout << "Size of BST: " << Size( root ) << std::endl;
 
-    Remove( root, 3 );
-    std::cout << "KB: size of BST: " << Size( root ) << std::endl;
+    Remove( root, 10 );
+    std::cout << "Size of BST after removal of 10: " << Size( root ) << std::endl;
     DepthFirstSearchTraversal( root, DFSTraversal::IN_ORDER_ );
 
-    std::cout << "Depth of node with key 5: " << DepthOfNode( root, 6, 0 ) << std::endl;
-    std::cout << "Depth of node with key 10: " << DepthOfNode( root, 10, 0 ) << std::endl;
+    std::cout << "Depth of node with key -2: " << DepthOfNode( root, -2, 0 ) << std::endl;
+    std::cout << "Depth of node with key 30: " << DepthOfNode( root, 30, 0 ) << std::endl;
 
     std::cout << "Height of the tree: " << HeightOfNode( root ) << std::endl;
 
