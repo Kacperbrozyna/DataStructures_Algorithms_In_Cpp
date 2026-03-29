@@ -19,9 +19,9 @@ struct Node
 
 enum class DFSTraversal
 {
-    PRE_ORDER_,             // Node, Left, Right
-    IN_ORDER_,              // Left, Node, Right
-    POST_ORDER_,            // Left, Right, Node
+    PRE_ORDER_,             // Node, Left, Midle, Right
+    IN_ORDER_,              // Left, Node, Middle, Right
+    POST_ORDER_,            // Left, Middle, Right, Node
 };
 
 template<typename T>
@@ -104,7 +104,7 @@ Node<T>* Insert(Node<T>* node, T data) {
 }
 
 template<typename T>
-Node<T>* Find(Node<T>* node, int data) {
+Node<T>* Find(Node<T>* node, T data) {
     if( !node )
     { 
         return nullptr;
