@@ -12,7 +12,6 @@ struct Node
         {}
 
     T data_;
-    bool end_of_word_{false};
     Node<T>* left_;
     Node<T>* middle_;
     Node<T>* right_;
