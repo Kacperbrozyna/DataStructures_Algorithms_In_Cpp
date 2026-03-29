@@ -85,7 +85,7 @@ void BreadthFirstSearch( Node<T>* root )
 template<typename T>
 Node<T>* Insert(Node<T>* node, T data) {
     if (!node)
-        return new Node(data);
+        return new Node<T>(data);
 
     if (data < node->data_) 
     {
@@ -211,7 +211,7 @@ int HeightOfNode( Node<T>* node )    //Can find the Height of the Tree by using 
 
 int main()
 {
-    Node<int>* root = new Node( 4 );
+    Node<int>* root = new Node<int>( 4 );
     root = Insert(root, 20);
     root = Insert(root, 10);
     root = Insert(root, 20); // This goes to the middle of the first 20

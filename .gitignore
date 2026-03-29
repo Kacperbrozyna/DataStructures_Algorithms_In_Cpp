@@ -1,6 +1,13 @@
 # Build Artifacts
 *.out
+*.exe
 
 # System Files
 .DS_Store
 *.dSYM/
+*.ilk
+*.obj
+*.pdb
+
+# vscode files
+*.vscode
